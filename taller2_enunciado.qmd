@@ -17,9 +17,13 @@ lang: es
 
 
 ```{r, message=FALSE, echo=FALSE}
-library("tidyverse")
-library("ggplot2")
-library("cluster")
+library(tidyverse)
+library(factoextra)
+library(GGally)
+library(ggplot2)
+library(cluster)
+ruta = "C://Users//joanm//Downloads//datos_taller_evaluado_2.csv"
+datos_taller_evaluado_2 = read.csv(ruta)
 ```
 
 
