@@ -10,9 +10,9 @@ lang: es
 
 **Nombre y apellido de cada miembro del grupo**
 
-* Estudiante 1
-* Estudiante 2
-* Estudiante 3
+* Toni Rigo
+* Joan miquel rubi
+* Monserrat pou
 
 
 
@@ -122,8 +122,80 @@ $$
 
 ##### a. ¿Qué supuestos deben cumplirse y mencionad cómo podríais verificarlos para que sea válido aplicar uno de los test estudiados en la asignatura? (1 punto)
 
+Para resolver este test un estadístico de contraste adecuado sería el $T^2$ de Hotelling. Para ello debe cumplirse que $Y_{Edu}$ y $Y_{Salud}$ sean independientes y sigan una distribución $N_8(\mu_{Edu},\Sigma)$ y $N_8(\mu_{Salud},\Sigma)$ respectivamente.Para ver que los dos siguen una normal multivariante podriamos hacer un QQ-plot multivariante, de esta manera si obtenemos que los datos estan más o menos sobre la diagonal, seguirán la distribución normal multivariante.En cambio, si se alejan mucho de la diagonal no lo harán. Además hay tests en R para verificPara verificar la normalidad. que las distribuciones tienen la misma matriz de covarianza, podríamos hacer un heatmap para ver visualmente las dos matrices de covarianzas muestrales y de esta forma ver si son similares
 
-##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego,  reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
+##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego, reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
+
+Supongamos que $Y_{Edu}$ y $Y_{Salud}$ siguen una distribución multivariante. Primero calculemos sus medias:
+
+```{r}
+library(tidyverse)
+tabla_educacion <- datos_taller_evaluado_2 %>%
+  filter(Sector == "Educación") %>%
+  select(4:11)
+tabla_Salud <- datos_taller_evaluado_2 %>%
+  filter(Sector == "Salud") %>%
+  select(4:11)
+media_educacion = colMeans(tabla_educacion)
+media_salud = colMeans(tabla_Salud)
+media_educacion
+media_salud
+```
+
+Ahora comprobemos si tienen la misma matriz de covarianzas. Para ello usaremos un heatmap de las matrices de covarianzas para visualizar si hay similitud entre ellas.
+
+```{r}
+library(reshape2)
+library(ggplot2)
+
+# 1. Calculamos las matrices de covarianza
+s_edu <- cov(tabla_educacion)
+s_salud <- cov(tabla_Salud)
+
+# 2. Convertimos a formato largo para ggplot
+edu_melt <- melt(s_edu)
+salud_melt <- melt(s_salud)
+edu_melt$Sector <- "Educación"
+salud_melt$Sector <- "Salud"
+
+# 3. Unimos y graficamos
+df_heat <- rbind(edu_melt, salud_melt)
+
+ggplot(df_heat, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white") +
+  facet_wrap(~Sector) +
+  theme_minimal() +
+  labs(title = "Comparación Visual de Matrices de Covarianza",
+       fill = "Valor Cov") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Como podemos ver las matrices de covarianzas muestrales son bastante similares, por tanto podemos suponer que siguen una distribución normal multivariante con la misma matriz de covarianza. Por tanto, como la matriz de covarianza es desconocida usaremos el estadístico $T^2$ de Hotelling y además $$\frac{n_1+n_2-1-p}{(n_1+n_2-2)*p}* T^2 \sim F_{n_1 + n_2 - 1 - p}^{p}$$
+
+```{r}
+S1 <- cov(tabla_educacion)
+S2 <- cov(tabla_Salud)
+n1 = 116
+n2 = 124
+p = 8
+# S_hat: Estimación insesgada de la matriz de covarianza
+S_hat <- (n1 * S1 + n2 * S2) / (n1 + n2 - 2)
+diff <- media_educacion - media_salud
+S_hat
+# Estadístico T2 y transformación a F
+T2 <- ((n1 * n2) / (n1 + n2)) * t(diff) %*% solve(S_hat) %*% diff
+T2
+constante <- (n1 + n2 - 1 - p) / ((n1 + n2 - 2) * p)
+F_obs <- as.numeric(constante * T2)
+
+# 5. REPORTE DE RESULTADOS Y DECISIÓN
+p_valor <- 1 - pf(F_obs, df1 = p, df2 = n1 + n2 - 1 - p)
+
+p_valor
+```
+
+Por tanto, si consideramos $\alpha=0.05$ rechazamos la hipótesis nula. Entonces, sí que hay diferencias significativas entre los sectores educación y salud. \#### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
 
 
 
