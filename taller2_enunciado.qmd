@@ -11,8 +11,8 @@ lang: es
 **Nombre y apellido de cada miembro del grupo**
 
 * Toni Rigo
-* Joan miquel rubi
-* Monserrat pou
+* Joan Miquel Rubi
+* Monserrat Pou
 
 
 
@@ -122,7 +122,7 @@ $$
 
 ##### a. ¿Qué supuestos deben cumplirse y mencionad cómo podríais verificarlos para que sea válido aplicar uno de los test estudiados en la asignatura? (1 punto)
 
-Para resolver este test un estadístico de contraste adecuado sería el $T^2$ de Hotelling. Para ello debe cumplirse que $Y_{Edu}$ y $Y_{Salud}$ sean independientes y sigan una distribución $N_8(\mu_{Edu},\Sigma)$ y $N_8(\mu_{Salud},\Sigma)$ respectivamente.Para ver que los dos siguen una normal multivariante podriamos hacer un QQ-plot multivariante, de esta manera si obtenemos que los datos estan más o menos sobre la diagonal, seguirán la distribución normal multivariante.En cambio, si se alejan mucho de la diagonal no lo harán. Además hay tests en R para verificPara verificar la normalidad. que las distribuciones tienen la misma matriz de covarianza, podríamos hacer un heatmap para ver visualmente las dos matrices de covarianzas muestrales y de esta forma ver si son similares
+Para resolver este test un estadístico de contraste adecuado sería el $T^2$ de Hotelling. Para ello debe cumplirse que $Y_{Edu}$ y $Y_{Salud}$ sean independientes y sigan una distribución $N_8(\mu_{Edu},\Sigma)$ y $N_8(\mu_{Salud},\Sigma)$ respectivamente.Para ver que los dos siguen una normal multivariante podriamos hacer un QQ-plot multivariante, de esta manera si obtenemos que los datos estan más o menos sobre la diagonal, seguirán la distribución normal multivariante.En cambio, si se alejan mucho de la diagonal no lo harán. Además hay tests en R para verificar la normalidad. que las distribuciones tienen la misma matriz de covarianza, podríamos hacer un heatmap para ver visualmente las dos matrices de covarianzas muestrales y de esta forma ver si son similares
 
 ##### b. Escribid un código en R que implemente el contraste de comparación de medias multivariantes apropiado entre los sectores Educación y Salud para las variables consideradas. El código debe calcular y mostrar el vector de medias muestrales de cada sector; ejecutar el contraste. Luego, reportad el p-valor y tomar una decisión para $\alpha=0.05$ en el contexto del problema (2 puntos)
 
