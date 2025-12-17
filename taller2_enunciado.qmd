@@ -195,7 +195,7 @@ p_valor <- 1 - pf(F_obs, df1 = p, df2 = n1 + n2 - 1 - p)
 p_valor
 ```
 
-Por tanto, si consideramos $\alpha=0.05$ rechazamos la hipótesis nula. Entonces, sí que hay diferencias significativas entre los sectores educación y salud. \#### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
+Por tanto, si consideramos $\alpha=0.05$ rechazamos la hipótesis nula. Entonces, sí que hay diferencias significativas entre los sectores educación y salud. 
 
 
 
