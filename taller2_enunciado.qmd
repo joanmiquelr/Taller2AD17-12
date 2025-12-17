@@ -61,8 +61,43 @@ library("cluster")
 #### 1. Realizad un análisis exploratorio multivariante del conjunto de datos. Para ello presentad e interpretad cada uno de los gráficos solicitados a continuación, relacionándolos  con el contexto del problema y destacando los patrones, asociaciones o diferencias relevantes que aporten información útil para comprender el uso de la IA en los distintos sectores (1 punto)
 
 *  **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Precisión`, `Robustez`,  `Productividad`, `Ahorro_tiempo` y `Aceptacion_usuarios`por `Sector`**
+
+```{r}
+vars = c("Precision", "Robustez",  "Productividad", "Ahorro_tiempo", "Aceptacion_usuarios")
+datos1 = datos_taller_evaluado_2 %>% select(Sector, vars)
+ggpairs(datos1,
+  columns = vars,
+  aes(color=Sector, alpha = 0.6),
+  upper = list(continuous = wrap("cor", size = 3)),
+  lower = list(continuous = wrap("points", size = 1.5)),
+  diag  = list(continuous = "densityDiag")
+  ) 
+```
+En el gráfico destaca que la mayoria de parejas de variables tienen una correlación global significativa (todas excepto `Robustez` y `Aceptación_usuarios`), la pareja que mayor correlación tiene es `Ahorro_tiempo` y `Productividad` con una correlación global de 0.855, cosa que tiene sentido porque si aumenta la productividad, entonces el tiempo usado para realizar las tareas será menor y obviamente el ahorro de tiempo será mayor. 
+
+Otras parejas que tienen una correlación global elevada son `Robustez`y `Precision`, ligeramente mayor en el sector de salud. `Aceptacion_usuarios` y `Productividad` también tiene una correlación alta lo cual tiene sentido ya que si el usuario que va a usar la IA está de acuerdo en usarla la productividad será mayor que si el usuario no está de acuerdo en usarla, en esta pareja destaca nuevamente el sector de la Salud. Tambien es alta la correlación de `Aceptacion_usuarios` y `Ahorro_tiempo`.
+
+La correlación global significativa más baja es la de la pareja `Aceptacion_usuarios` y `Precision`, incluso el sector de Educación tiene una correlación negativa (aunque muy cercana a 0) aunque la correlación de los sectores no es significativa. 
+
  
 * **Una matriz de gráficos de dispersión que incluya las correlaciones entre las variables: `Riesgo_etico`, `Riesgo_legal` y `Coste` por `Sector`**
+
+```{r}
+vars2 = c("Riesgo_etico", "Riesgo_legal", "Coste")
+datos2 = datos_taller_evaluado_2 %>% select(Sector, vars2)
+ggpairs(datos2,
+  columns = vars2,
+  aes(color=Sector, alpha = 0.6),
+  upper = list(continuous = wrap("cor", size = 3)),
+  lower = list(continuous = wrap("points", size = 1.5)),
+  diag  = list(continuous = "densityDiag")
+  )
+```
+
+En este gráfico destaca que todas las correlaciones (globales y divididas por sector) son signigicativas y altas, lo que significa que en ambos sectores se ven las 3 cosas como un bloque altamente interrelacionado. La mayor es la de la pareja `Riesgo_legal` y `Riesgo_etico`, y además es casi igual en ambos sectores, esto índica que quien vea riesgo legal también suele ver riesgo ético en el uso de la IA.
+
+En cuanto a `Coste` se ve que el sector de la educación relaciona las soluciones más costosas con un mayor riesgo (tanto legal como ético), especialmente en el sector de la Educación.
+
 
 
 
@@ -90,6 +125,60 @@ $$
 
 #### 3. Representad de manera reducida los perfiles multivariantes del uso de IA del sector Educación y del sector Salud (por separado). Interpretad  las componentes retenidas, explicando su posible significado práctico en el contexto del problema. Justificad bien el procedimiento (3 puntos)
 
+```{r educacion}
+Educacion = datos_taller_evaluado_2 %>% filter(datos_taller_evaluado_2$Sector == "Educación")
+educacion_num = Educacion %>% select(where(is.numeric)) %>% scale()
+pca_educacion = prcomp(educacion_num)
+fviz_screeplot(pca_educacion, addlabels = TRUE, ylim = c(0, 100))
+```
+
+Entonces con las dos primeras variables conseguimos mantener un 81.5% de la información.
+
+En la primera variable del PCA la variable inicial que tiene más peso es `Riesgo_legal` con un valor muy cercano está `Riesgo_etico`, la que menos con bastante diferencia de la siguiente es `Robustez`.
+
+En la segunda variable del PCA la variable inicial que tiene más peso es `Robustez` y después están muy cerca `Precision` y `Aceptacion_usuarios`, en este caso la que menos pesa es `Riesgo_etico` con un valor muy cercano a 0, igual que `Riesgo_legal` aunque su valor es ligeramente mayor.
+
+Vemos que las que tienen un peso mayor en la primera tienen un peso menor en la segunda y viceversa, es por ello que mantenemos un porcentaje alto de información usando solo 2 nuevas variables.
+
+
+```{r salud}
+Salud = datos_taller_evaluado_2 %>% filter(datos_taller_evaluado_2$Sector == "Salud")
+salud_num = Salud %>% select(where(is.numeric)) %>% scale()
+pca_salud = prcomp(salud_num)
+fviz_screeplot(pca_salud, addlabels = TRUE, ylim = c(0, 100))
+```
+
+Si cogemos 2 variables mantenemos un 80.2% de la información inicial.
+
+En la primera variable vemos que las variables con un peso mayor son `Riesgo_legal` y `Riesgo_etico`, y la que menos es `Robustez`
+
+En la segunda variable del PCA las variables iniciales que tienen más peso son `Robustez`, `Precision` y `Aceptacion_usuarios`, en este caso las que menos peso tienen son `Riesgo_etico` y `Riesgo_legal`.
+
+De nuevo vemos que las variables que están altamente representadas en la primera están menos representadas en la segunda y viceversa, por ello mantenemos una cantidad tan alta de información solo usando dos variables.
+
+
+Veamos las proyecciones de los puntos en sus dos primeras nuevas variables
+
+```{r puntos, fig.show="hold", fig.width=10, fig.height=5}
+fviz_pca_biplot(
+  pca_educacion,
+  geom = "point",
+  alpha = 0.6,
+  title = "PCA – Sector Educación"
+)
+fviz_pca_biplot(
+  pca_salud,
+  geom = "point",
+  alpha = 0.6,
+  title = "PCA – Sector Salud"
+)
+```
+
+En estos gráficos vemos donde están los puntos en función de las dos primeras variables del PCA y las flechas nos dicen el peso de cada variable inicial. 
+
+En ambos sectores los pesos de las variables iniciales son bastantes parecidas, ya lo hemos comentado arriba mirando `pca_educacion$rotation` y `pca_salud$rotation`.
+
+Los puntos que estén más abajo significa que tienen un valor más alto de `Robustez` mientras que si están más arriba tienen un valor de `Aceptacion_usuarios` más alto, cuanto más a la derecha tienen un valor más alto de `Riesgo_legal` o `Riesgo_etico`
 
 #### 4. A continuación os presentamos dos bloques de código. Explicad de forma breve qué procedimiento estadístico se aplica en cada bloque. Después, interpretad los resultados en el contexto del problema: describid qué perfiles de uso de IA emergen en el sector Educación y en qué se diferencian entre sí. Por último, compara ambos bloques y justificad cuál de los dos resultados consideráis más adecuado para describir los perfiles (3 puntos)
 
